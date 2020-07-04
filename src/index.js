@@ -1,6 +1,6 @@
 const initModel = 0;
 
-function view(model, dispatch) {
+function view(dispatch, model) {
   const div = document.createElement("div");
   const counter = document.createElement("div");
 
@@ -9,8 +9,9 @@ function view(model, dispatch) {
     incrementBtn,
     decrementBtn
   );
+
   incrementBtn.addEventListener("click", () => dispatch("+"));
-  decrementBtn.addEventListener("click", () => console.log("-"));
+  decrementBtn.addEventListener("click", () => dispatch("-"));
 
   return div;
 }
@@ -26,17 +27,22 @@ function update(msg, model) {
   }
 }
 
-//impure code below
+// impure code below
 
 function app(initModel, view, update, node) {
   let model = initModel;
-  let currentView = view(model);
-  node.append(currentView);
+  let currentView = view(dispatch, model);
+
+  if (node) {
+    // side effect
+    node.append(currentView);
+  }
 
   function dispatch(msg) {
     model = update(msg, model);
-    currentView = view(model);
-    node.replaceChild(currentView);
+    const updatedView = view(dispatch, model);
+    node.replaceChild(updatedView, currentView);
+    currentView = updatedView;
   }
 }
 
@@ -49,9 +55,7 @@ incrementBtn.innerText = "+";
 decrementBtn.setAttribute("type", "button");
 decrementBtn.innerText = "-";
 
-// incrementBtn.addEventListener("click", () => dispatch("+"));
-// decrementBtn.addEventListener("click", () => dispatch("-"));
-
 const main = document.querySelector(".main");
-// main.append(view(update("+", initModel)));
 app(initModel, view, update, main);
+
+module.exports = update;
