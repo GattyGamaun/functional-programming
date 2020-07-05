@@ -1,61 +1,68 @@
-const initModel = 0;
+// pure
+const initValue = 0;
 
-function view(dispatch, model) {
-  const div = document.createElement("div");
-  const counter = document.createElement("div");
+// pure functions
 
-  div.append(
-    (counter.innerText = `Counter: ${model}`),
-    incrementBtn,
-    decrementBtn
-  );
-
-  incrementBtn.addEventListener("click", () => dispatch("+"));
-  decrementBtn.addEventListener("click", () => dispatch("-"));
-
-  return div;
+const action = {
+  ADD: 'ADD',
+  SUBTRACT: 'SUBTRACT'
 }
 
-function update(msg, model) {
-  switch (msg) {
-    case "+":
-      return model + 1;
-    case "-":
-      return model - 1;
+function makeView(dispatch, value) {
+  const wrapper = document.createElement('div');
+  const buttons = document.createElement('div');
+  const text = document.createElement('span');
+  const result = document.createElement('span');
+  const incrementBtn = document.createElement('button');
+  const decrementBtn = document.createElement('button');
+  text.innerText = 'Counter: ';
+  result.innerText = value;
+  incrementBtn.innerText = '+';
+  incrementBtn.className = 'increment btn';
+  decrementBtn.innerText = '-';
+  decrementBtn.className = 'decrement btn';
+
+  incrementBtn.addEventListener('click', () => dispatch(action.ADD));
+  decrementBtn.addEventListener('click', () => dispatch(action.SUBTRACT));
+
+  buttons.append(incrementBtn, decrementBtn);
+  wrapper.append(text, result, buttons);
+
+  return wrapper;
+}
+
+function updateValue(action, value) {
+  switch (action) {
+    case 'ADD':
+      return value + 1;
+    case 'SUBTRACT':
+      return value - 1;
     default:
-      return model;
+      return value;
   }
 }
 
 // impure code below
 
-function app(initModel, view, update, node) {
-  let model = initModel;
-  let currentView = view(dispatch, model);
-
+function app(initValue, updateValue, makeView, node) {
+  let state = initValue;
+  let currentView = makeView(dispatch, state);
+  //side effect
   if (node) {
-    // side effect
-    node.append(currentView);
+    node.appendChild(currentView);
   }
 
-  function dispatch(msg) {
-    model = update(msg, model);
-    const updatedView = view(dispatch, model);
+  function dispatch(action) {
+    state = updateValue(action, state);
+    let updatedView = makeView(dispatch, state);
     node.replaceChild(updatedView, currentView);
     currentView = updatedView;
   }
 }
 
-const incrementBtn = document.createElement("button");
-const decrementBtn = document.createElement("button");
+// side effect
+const mainNode = document.querySelector('.main');
+app(initValue, updateValue, makeView, mainNode);
+// mainNode.appendChild(makeView(updateValue('-', initValue)))
 
-incrementBtn.classList.add("button");
-incrementBtn.setAttribute("type", "button");
-incrementBtn.innerText = "+";
-decrementBtn.setAttribute("type", "button");
-decrementBtn.innerText = "-";
-
-const main = document.querySelector(".main");
-app(initModel, view, update, main);
-
-module.exports = update;
+module.exports = updateValue;
