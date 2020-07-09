@@ -8,7 +8,7 @@ function makeButton(text) {
   return button;
 }
 
-function makeInput(text, placeholder, className, onInput) {
+function makeInput(text, placeholder, className) {
   const wrapper = document.createElement('div');
   const label = document.createElement('label');
   const input = document.createElement('input');
@@ -19,7 +19,6 @@ function makeInput(text, placeholder, className, onInput) {
   input.placeholder = placeholder;
   input.type = 'text';
   input.style.width = 300 + 'px';
-  input.onblur = onInput;
 
   wrapper.append(label, input);
 
@@ -27,23 +26,13 @@ function makeInput(text, placeholder, className, onInput) {
 }
 
 function viewForm(dispatch, model) {
-  let { description, calories, showForm } = model;
-
-  function onSubmit(e) {
-    e.preventDefault();
-    dispatch(saveFormMsg);
-  }
-
+  const { showForm, description, calories } = model;
+  const mealInput = makeInput('Meal', description, 'meal-input');
+  const caloriesInput = makeInput('Calories', calories, 'calories-input');
   const addBtn = makeButton('Add meal');
   const cancelBtn = makeButton('Cancel');
   const saveBtn = makeButton('Save');
-  const mealInput = makeInput('Meal', description, 'meal-input',
-          e => dispatch(saveMealMsg(e.target.value)));
-  const caloriesInput = makeInput('Calories', calories || '', 'calories input',
-      e => dispatch(saveCaloriesMsg(e.target.value)));
 
-  mealInput.className = 'meal-input';
-  caloriesInput.className = 'calories-input';
 
   const form = document.createElement('form');
 
@@ -55,7 +44,8 @@ function viewForm(dispatch, model) {
 
   addBtn.addEventListener('click', () => dispatch(showFormMsg(true)));
   cancelBtn.addEventListener('click', () => dispatch(showFormMsg(false)));
-  saveBtn.addEventListener('click', onSubmit);
+  mealInput.addEventListener('blur', (e) => dispatch(saveMealMsg(e.target.value)));
+  caloriesInput.addEventListener('blur', (e) => dispatch(saveCaloriesMsg(e.target.value)));
 
   if (showForm) {
     return form;
@@ -65,13 +55,15 @@ function viewForm(dispatch, model) {
 }
 
 function view(dispatch, model) {
+  const headingElement = document.createElement('h1');
   const wrapper = document.createElement('div');
   const listField = document.createElement('div');
 
+  headingElement.innerText = 'Calorie Counter';
   listField.innerText = JSON.stringify(model, null, 2);
   listField.className = 'list-field';
 
-  wrapper.append(viewForm(dispatch, model), listField);
+  wrapper.append(headingElement, viewForm(dispatch, model), listField);
 
   return wrapper;
 }
