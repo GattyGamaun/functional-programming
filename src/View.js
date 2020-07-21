@@ -8,7 +8,7 @@ function makeButton(text) {
   return button;
 }
 
-function makeInput(text, placeholder, className) {
+function makeInput(text, placeholder, className, callback) {
   const wrapper = document.createElement('div');
   const label = document.createElement('label');
   const input = document.createElement('input');
@@ -19,6 +19,7 @@ function makeInput(text, placeholder, className) {
   input.placeholder = placeholder;
   input.type = 'text';
   input.style.width = 300 + 'px';
+  input.addEventListener('blur', callback);
 
   wrapper.append(label, input);
 
@@ -27,8 +28,10 @@ function makeInput(text, placeholder, className) {
 
 function viewForm(dispatch, model) {
   const { showForm, description, calories } = model;
-  const mealInput = makeInput('Meal', description, 'meal-input');
-  const caloriesInput = makeInput('Calories', calories, 'calories-input');
+  const mealInput = makeInput('Meal', description, 'meal-input',
+      (e) => dispatch(saveMealMsg(e.target.value)));
+  const caloriesInput = makeInput('Calories', calories, 'calories-input',
+      (e) => dispatch(saveCaloriesMsg(e.target.value)));
   const addBtn = makeButton('Add meal');
   const cancelBtn = makeButton('Cancel');
   const saveBtn = makeButton('Save');
@@ -44,8 +47,10 @@ function viewForm(dispatch, model) {
 
   addBtn.addEventListener('click', () => dispatch(showFormMsg(true)));
   cancelBtn.addEventListener('click', () => dispatch(showFormMsg(false)));
-  mealInput.addEventListener('blur', (e) => dispatch(saveMealMsg(e.target.value)));
-  caloriesInput.addEventListener('blur', (e) => dispatch(saveCaloriesMsg(e.target.value)));
+  saveBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    dispatch(saveFormMsg)
+  });
 
   if (showForm) {
     return form;
